@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flowbite Datepicker & Timepicker</title>
+    <link href="style.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        
+        /* body { font-family: Roboto, ; } */
+
+        #map { height: 100px; width: 100%; }
+        .container { max-width: 600px; margin: auto; text-align: left; }
+    </style>
+</head>
+<body class="bg-gray-100 flex justify-center items-center min-h-screen">
+
+    <div class="bg-white p-6 rounded-lg shadow-lg">
+        <h2 class="text-xl font-semibold mb-4">Input data</h2>
+
+        <div class="flex flex-row space-x-4">
+
+            <div>
+                <div class="container">
+                    <h2>Pilih Lokasi di Peta (berikan titik pada peta untuk mendapatkan alamat)</h2>
+                    <div id="map"></div>
+                    <br>
+                    <label>Latitude: <input type="text" id="latitude" readonly></label>
+                    <br><br>
+                    <label>Longitude: <input type="text" id="longitude" readonly></label>
+                    <br><br>
+                    <label>Address: <input type="text" id="address" readonly></label>
+                </div>
+            
+                <script>
+                    function reverseGeocode(lat, lng) {
+                        let url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=id`;
+                        
+                        fetch(url)
+                            .then(response => response.json())
+                            .then(data => {
+                                document.getElementById("address").value = data.display_name || "Alamat tidak ditemukan";
+                            })
+                            .catch(error => console.error('Error:', error));
+                    }
+                    // Inisialisasi peta
+                    const map = L.map('map').setView([-6.200000, 106.816666], 12);
+            
+                    // Gunakan tile dari OpenStreetMap
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; OpenStreetMap contributors'
+                    }).addTo(map);
+            
+                    // Tambahkan marker
+                    let marker = L.marker([-6.200000, 106.816666], { draggable: true }).addTo(map);
+            
+                    // Event saat marker dipindahkan
+                    marker.on('dragend', function(event) {
+                        let latlng = event.target.getLatLng();
+                        document.getElementById("latitude").value = latlng.lat;
+                        document.getElementById("longitude").value = latlng.lng;
+                    });
+            
+                    // Event saat peta diklik
+                    map.on('click', function(event) {
+                        let latlng = event.latlng;
+                        marker.setLatLng(latlng);
+                        document.getElementById("latitude").value = latlng.lat;
+                        document.getElementById("longitude").value = latlng.lng;
+                        reverseGeocode(latlng.lat, latlng.lng);
+                    });
+                    
+                </script>
+            </div>
+
+            <div>
+                <!-- Datepicker -->
+                <label for="default-datepicker" class="block mb-2 text-sm font-medium text-gray-900">Pick a date</label>
+                <div class="relative max-w-sm">
+                    <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+                        </svg>
+                    </div>
+                    <input datepicker id="default-datepicker" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select date">
+                </div>
+            </div>
+
+            <div>
+                <!-- Timepicker -->
+                
+                <form class="max-w-[8.5rem]">
+                    <label for="time" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select time:</label>
+                    <div class="flex">
+                        <input type="time" id="time" class="rounded-none rounded-s-lg bg-gray-50 border text-gray-900 leading-none focus:ring-blue-500 focus:border-blue-500 block flex-1 w-full text-sm border-gray-300 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value="00:00" required>
+                        <span class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-s-0 border-s-0 border-gray-300 rounded-e-md dark:bg-gray-600 dark:text-gray-400 dark:border-gray-600">
+                            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                <path fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z" clip-rule="evenodd"/>
+                            </svg>
+                        </span>
+                    </div>
+                </form>
+            </div>
+            <div id="data" class="">
+
+            </div>
+        </div>
+        <button onclick="Render()" class="relative inline-flex top-2 items-center justify-center p-0.5 mb-2 me-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-purple-600 to-blue-500 group-hover:from-purple-600 group-hover:to-blue-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800">
+            <span class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-transparent group-hover:dark:bg-transparent">
+            Render Tag
+            </span>
+        </button>
+
+    </div>
+
+
+    <script>
+        function formatTimeManual(time) {
+            let [hours, minutes] = time.split(":").map(Number);
+            let period = hours >= 12 ? "PM" : "AM";
+            hours = hours % 12 || 12; // Convert 0 or 12+ to 12-hour format
+            return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")} ${period} GMT+07:00`;
+        }
+
+
+         document.getElementById("time").addEventListener("change", function () {
+                console.log(formatTimeManual(this.value));
+            });
+
+        function Render(){
+            let latitude = document.getElementById("latitude").value;
+            let longitude = document.getElementById("longitude").value;
+            let address = document.getElementById("address").value;
+            let date = document.getElementById("default-datepicker").value;
+            let time = document.getElementById("time").value;
+            let formattedTime = formatTimeManual(time);
+
+            let data = {
+                latitude: latitude,
+                longitude: longitude,
+                address: address,
+                date: date,
+                time: formattedTime
+            };
+
+            let container = document.getElementById("data");
+            // container.classList.add("data");
+            container.innerHTML = `
+                <div class="absolute bottom-2 bg-black bg-opacity-80 text-white p-4 rounded-l-lg rounded-br-lg w-1/2 ">
+                    <div id="logo" class="absolute -top-[24px] right-0 flex items-center bg-black bg-opacity-80 text-white text-xs px-2 py-1 rounded-tl-lg rounded-tr-lg ">
+                        <img src="assets/unnamed.png" alt="Logo" class="w-4 h-4 mr-1">
+                        GPS Map Camera
+                    </div>
+                    <div class="flex flex-row items-center justify-center">
+                        <img src="assets/unnamed.png" alt="Logo" class="w-2 h-2 mr-1">
+                        <div class="relative overflow-hidden">
+                            <h2 class="text-sm font-bold mt-6">TESTING</h2>
+                            <p class="text-xs mt-1">${data.address}</p>
+                            <p class="text-xs mt-1">Lat ${data.latitude}, Long ${data.longitude}</p>
+                            <p class="text-xs mt-1">${data.date} ${data.time}</p>
+                            <p class="text-xs mt-1">Note: Captured by GPS Map Camera</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(container);
+        }
+    </script>
+
+</body>
+</html>
